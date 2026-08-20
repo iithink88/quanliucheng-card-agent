@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全流程知识卡片 · 智能体</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶部状态栏 -->
+  <div class="statusbar">
+    <div class="sb-left">
+      <span class="sb-ic">🧩</span>
+      <span class="sb-title">全流程知识卡片</span>
+    </div>
+    <button class="set-btn" id="setBtn" title="设置模型">⚙</button>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-ic">🌿🏭</div>
+      <div class="hero-t">输入一个主题，生成「制作全流程」知识卡片！</div>
+      <div class="hero-s">扁平风插画 · 浅绿背景 · 卡通简约<br>图标 + 文字，一步步看懂它是怎么来的 🧪</div>
+    </div>
+
+    <!-- ① 主题输入 -->
+    <div class="card">
+      <div class="card-h"><b>①</b> 要讲哪个主题？</div>
+      <label class="lbl">主题（它是怎么制作/诞生的）</label>
+      <input class="field" id="theme" placeholder="例如：绿茶 / 豆腐 / 纸张 / 陶瓷 / 丝绸 / 巧克力" autocomplete="off">
+
+      <div class="chips" id="chips">
+        <span class="chip" data-t="绿茶">绿茶</span>
+        <span class="chip" data-t="豆腐">豆腐</span>
+        <span class="chip" data-t="纸张">纸张</span>
+        <span class="chip" data-t="陶瓷">陶瓷</span>
+        <span class="chip" data-t="丝绸">丝绸</span>
+        <span class="chip" data-t="巧克力">巧克力</span>
+      </div>
+
+      <div class="field-gap"></div>
+      <label class="lbl">出图方式</label>
+      <div class="seg" id="mode">
+        <button class="seg-btn active" data-v="image">🤖 AI 绘图（需图模型）</button>
+        <button class="seg-btn" data-v="text">📝 仅生成步骤 / Prompt</button>
+      </div>
+      <div class="tip" id="modeTip">AI 绘图模式：需先在右上角 ⚙ 配置「图模型」，直接生成扁平风插画。未配置会自动降级为「仅生成步骤卡片」。</div>
+    </div>
+
+    <!-- ② 生成进度 -->
+    <div class="card">
+      <div class="card-h"><b>②</b> 生成进度</div>
+      <div class="pbar"><i id="pbar" style="width:0%"></i></div>
+      <div class="step-label" id="stepLabel">还没开始～</div>
+      <div class="logbox" id="log"><span class="empty">等待生成…</span></div>
+    </div>
+
+    <!-- ③ 结果 -->
+    <div class="card">
+      <div class="card-h"><b>③</b> 成品预览</div>
+      <div id="resultEmpty" class="empty">生成完成后，这里会显示知识卡片 👇</div>
+      <iframe id="preview" class="preview hidden" title="知识卡片预览"></iframe>
+      <div class="result-btns hidden" id="resultBtns">
+        <button class="btn-ghost" id="dlBtn">⬇ 下载卡片</button>
+        <button class="btn-ghost" id="dlImgBtn">🖼 下载图片</button>
+        <button class="btn-ghost" id="newBtn">↗ 新窗口打开</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 底部操作栏 -->
+  <div class="footer-bar">
+    <button class="btn-ghost" id="clearBtn">清空</button>
+    <button class="btn-main" id="genBtn">🚀 开始生成</button>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div class="set-overlay" id="setOverlay">
+    <div class="set-panel">
+      <div class="set-head">
+        <span>⚙ 模型设置</span>
+        <button class="set-x" id="setX">✕</button>
+      </div>
+      <div class="set-tip">配置「自己的大模型 / 画图模型」，地址需为 OpenAI 兼容格式。配置仅保存在本机 <code>.env</code> 文件。</div>
+
+      <div class="set-group-title">🧠 语言大模型（LLM）</div>
+      <div class="key-row">
+        <label>服务商（常用网址一键填）</label>
+        <select class="field" id="llm_provider">
+          <option value="custom">自定义 / 其它</option>
+          <option value="openai">OpenAI</option>
+          <option value="deepseek">DeepSeek 深度求索</option>
+          <option value="dashscope">通义千问（阿里）</option>
+          <option value="zhipu">智谱 GLM（清华）</option>
+          <option value="moonshot">Kimi 月之暗面</option>
+          <option value="siliconflow">硅基流动 SiliconFlow</option>
+          <option value="volcengine">火山方舟 / 豆包（字节）</option>
+          <option value="hunyuan">腾讯混元</option>
+          <option value="ollama">Ollama（本机本地）</option>
+        </select>
+      </div>
+      <a class="key-link" id="llmKeyLink" target="_blank" rel="noopener" style="display:none"></a>
+      <div class="key-row"><label>模型地址 (Base URL)</label><input class="field" id="llm_base" placeholder="https://api.openai.com/v1"></div>
+      <div class="key-row"><label>API Key</label><input class="field" id="llm_key" placeholder="sk-..." type="password"></div>
+      <div class="key-row"><label>模型名 (Model)</label><input class="field" id="llm_model" placeholder="gpt-4o-mini / deepseek-chat ..."></div>
+
+      <div class="set-group-title">🎨 图像模型（可选）</div>
+      <div class="key-row">
+        <label>服务商（常用网址一键填）</label>
+        <select class="field" id="img_provider">
+          <option value="custom">自定义 / 其它</option>
+          <option value="openai">OpenAI（DALL·E / gpt-image-1）</option>
+          <option value="siliconflow">硅基流动 SiliconFlow</option>
+          <option value="dashscope">通义万相（阿里）</option>
+          <option value="volcengine">火山方舟（字节）</option>
+        </select>
+      </div>
+      <a class="key-link" id="imgKeyLink" target="_blank" rel="noopener" style="display:none"></a>
+      <div class="key-row"><label>模型地址 (Base URL)</label><input class="field" id="img_base" placeholder="https://api.openai.com/v1"></div>
+      <div class="key-row"><label>API Key</label><input class="field" id="img_key" placeholder="sk-..." type="password"></div>
+      <div class="key-row"><label>模型名 (Model)</label><input class="field" id="img_model" placeholder="dall-e-3 / gpt-image-1 ..."></div>
+      <div class="key-row"><label>图片尺寸 (Size)</label><input class="field" id="img_size" placeholder="1792x1024（横版） / 1024x1024"></div>
+      <button class="btn-ghost" id="testImgBtn" style="margin-top:10px;">测试图像模型连通</button>
+
+      <div class="set-foot">
+        <button class="btn-ghost" id="testBtn" style="margin-bottom:10px;">测试 LLM 连通</button>
+        <button class="btn-main" id="saveBtn">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
